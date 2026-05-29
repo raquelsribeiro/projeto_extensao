@@ -29,13 +29,13 @@ const usuarios = [
   }
 ];
 
-const insertUsuario = db.prepare(`
+const insertUser = db.prepare(`
   INSERT INTO usuarios (nome, email, setor)
   VALUES (?, ?, ?)
 `);
 
-for (const usuario of usuarios) {
-  insertUsuario.run(usuario.nome, usuario.email, usuario.setor);
+for (const user of usuarios) {
+  insertUser.run(user.nome, user.email, user.setor);
 }
 
 console.log('✅ Banco de dados seed completo! 4 usuários inseridos.');

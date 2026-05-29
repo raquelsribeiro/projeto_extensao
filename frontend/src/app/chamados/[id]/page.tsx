@@ -3,40 +3,38 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { buscarChamadoPorId, atualizarChamado, Chamado, HistoricoChamado } from '@/lib/api';
+import { fetchTicketById, updateTicketStatus, Ticket } from '@/lib/api';
 import StatusBadge from '@/components/StatusBadge';
-import UrgenciaBadge from '@/components/UrgenciaBadge';
+import PriorityBadge from '@/components/PriorityBadge';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 const STATUS_OPCOES = ['Aberto', 'Em Andamento', 'Concluído'];
 
-export default function DetalhesChamado({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const [chamado, setChamado] = useState<Chamado | null>(null);
+export default function TicketDetailsPage({ params }: { params: { id: string } }) {
+  const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
-  const [showModalAtualizar, setShowModalAtualizar] = useState(false);
-  const [atualizando, setAtualizando] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
-  const [formAtualizacao, setFormAtualizacao] = useState({
+  const [updateForm, setUpdateForm] = useState({
     status_novo: '',
     observacao: '',
   });
 
   useEffect(() => {
-    carregarChamado();
+    loadTicket();
   }, [params.id]);
 
-  const carregarChamado = async () => {
+  const loadTicket = async () => {
     try {
       setLoading(true);
       setErro('');
-      const dados = await buscarChamadoPorId(params.id);
-      setChamado(dados);
-      setFormAtualizacao((prev) => ({
+      const data = await fetchTicketById(params.id);
+      setTicket(data);
+      setUpdateForm((prev) => ({
         ...prev,
-        status_novo: dados.status,
+        status_novo: data.status,
       }));
     } catch (err) {
       setErro('Chamado não encontrado');
@@ -46,26 +44,26 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
     }
   };
 
-  const handleAtualizar = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formAtualizacao.status_novo) {
+    if (!updateForm.status_novo) {
       setErro('Selecione um novo status');
       return;
     }
 
-    setAtualizando(true);
+    setUpdating(true);
     setErro('');
 
     try {
-      await atualizarChamado(params.id, {
-        status_novo: formAtualizacao.status_novo,
-        observacao: formAtualizacao.observacao || undefined,
+      await updateTicketStatus(params.id, {
+        status_novo: updateForm.status_novo,
+        observacao: updateForm.observacao || undefined,
       });
 
-      setShowModalAtualizar(false);
-      await carregarChamado();
-      setFormAtualizacao({
+      setShowUpdateModal(false);
+      await loadTicket();
+      setUpdateForm({
         status_novo: '',
         observacao: '',
       });
@@ -73,7 +71,7 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
       setErro('Erro ao atualizar chamado');
       console.error(err);
     } finally {
-      setAtualizando(false);
+      setUpdating(false);
     }
   };
 
@@ -85,7 +83,7 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
     );
   }
 
-  if (erro && !chamado) {
+  if (erro && !ticket) {
     return (
       <div className="text-center py-12">
         <p className="text-red-500 text-lg mb-4">{erro}</p>
@@ -96,10 +94,10 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
     );
   }
 
-  if (!chamado) return null;
+  if (!ticket) return null;
 
-  const dataFormatada = new Date(chamado.created_at).toLocaleDateString('pt-BR');
-  const dataAtualizacaoFormatada = new Date(chamado.updated_at).toLocaleDateString('pt-BR');
+  const formattedDate = new Date(ticket.created_at).toLocaleDateString('pt-BR');
+  const formattedUpdateDate = new Date(ticket.updated_at).toLocaleDateString('pt-BR');
 
   return (
     <div>
@@ -110,10 +108,10 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-dark-blue mb-2">{chamado.titulo}</h1>
-            <p className="text-gray-500 text-sm">ID: {chamado.id}</p>
+            <h1 className="text-3xl font-bold text-dark-blue mb-2">{ticket.titulo}</h1>
+            <p className="text-gray-500 text-sm">ID: {ticket.id}</p>
           </div>
-          <StatusBadge status={chamado.status} />
+          <StatusBadge status={ticket.status} />
         </div>
 
         {erro && (
@@ -125,41 +123,41 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 pb-6 border-b border-gray-200">
           <div>
             <p className="text-xs text-gray-500 uppercase mb-1">Tipo</p>
-            <p className="text-lg font-semibold text-gray-700">{chamado.tipo}</p>
+            <p className="text-lg font-semibold text-gray-700">{ticket.tipo}</p>
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase mb-1">Urgência</p>
-            <UrgenciaBadge urgencia={chamado.urgencia} />
+            <PriorityBadge urgency={ticket.urgencia} />
           </div>
 
           <div>
             <p className="text-xs text-gray-500 uppercase mb-1">Responsável</p>
             <p className="text-lg font-semibold text-gray-700">
-              {chamado.responsavel_nome ? `${chamado.responsavel_nome} (${chamado.responsavel_setor})` : 'Não atribuído'}
+              {ticket.responsavel_nome ? `${ticket.responsavel_nome} (${ticket.responsavel_setor})` : 'Não atribuído'}
             </p>
           </div>
 
           <div>
             <p className="text-xs text-gray-500 uppercase mb-1">Prazo Esperado</p>
             <p className="text-lg font-semibold text-gray-700">
-              {chamado.prazo_esperado ? new Date(chamado.prazo_esperado).toLocaleDateString('pt-BR') : 'Não informado'}
+              {ticket.prazo_esperado ? new Date(ticket.prazo_esperado).toLocaleDateString('pt-BR') : 'Não informado'}
             </p>
           </div>
         </div>
 
         <div className="mb-6">
           <p className="text-xs text-gray-500 uppercase mb-2">Descrição</p>
-          <p className="text-gray-700 whitespace-pre-wrap">{chamado.descricao}</p>
+          <p className="text-gray-700 whitespace-pre-wrap">{ticket.descricao}</p>
         </div>
 
         <div className="flex justify-between items-center text-sm text-gray-500 mb-6 pb-6 border-b border-gray-200">
-          <span>Criado em: {dataFormatada}</span>
-          <span>Atualizado em: {dataAtualizacaoFormatada}</span>
+          <span>Criado em: {formattedDate}</span>
+          <span>Atualizado em: {formattedUpdateDate}</span>
         </div>
 
         {/* Botão para atualizar status */}
         <button
-          onClick={() => setShowModalAtualizar(true)}
+          onClick={() => setShowUpdateModal(true)}
           className="bg-dark-blue text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-900 transition"
         >
           Atualizar Status
@@ -167,21 +165,21 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
       </div>
 
       {/* Modal de atualização */}
-      {showModalAtualizar && (
+      {showUpdateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
             <h2 className="text-2xl font-bold text-dark-blue mb-4">Atualizar Status</h2>
 
-            <form onSubmit={handleAtualizar}>
+            <form onSubmit={handleUpdate}>
               <div className="mb-4">
                 <label htmlFor="status_novo" className="block text-sm font-semibold text-gray-700 mb-2">
                   Novo Status
                 </label>
                 <select
                   id="status_novo"
-                  value={formAtualizacao.status_novo}
+                  value={updateForm.status_novo}
                   onChange={(e) =>
-                    setFormAtualizacao((prev) => ({
+                    setUpdateForm((prev) => ({
                       ...prev,
                       status_novo: e.target.value,
                     }))
@@ -203,9 +201,9 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
                 </label>
                 <textarea
                   id="observacao"
-                  value={formAtualizacao.observacao}
+                  value={updateForm.observacao}
                   onChange={(e) =>
-                    setFormAtualizacao((prev) => ({
+                    setUpdateForm((prev) => ({
                       ...prev,
                       observacao: e.target.value,
                     }))
@@ -219,14 +217,14 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
               <div className="flex gap-4">
                 <button
                   type="submit"
-                  disabled={atualizando}
+                  disabled={updating}
                   className="flex-1 bg-dark-blue text-white py-2 rounded-lg font-semibold hover:bg-blue-900 transition disabled:opacity-50"
                 >
-                  {atualizando ? 'Atualizando...' : 'Atualizar'}
+                  {updating ? 'Atualizando...' : 'Atualizar'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowModalAtualizar(false)}
+                  onClick={() => setShowUpdateModal(false)}
                   className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-400 transition"
                 >
                   Cancelar
@@ -238,16 +236,16 @@ export default function DetalhesChamado({ params }: { params: { id: string } }) 
       )}
 
       {/* Histórico de atualizações */}
-      {chamado.historico && chamado.historico.length > 0 && (
+      {ticket.historico && ticket.historico.length > 0 && (
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-2xl font-bold text-dark-blue mb-6">Histórico de Atualizações</h2>
 
           <div className="relative">
-            {chamado.historico.map((item, index) => (
+            {ticket.historico.map((item, index) => (
               <div key={item.id} className="mb-6 flex gap-4">
                 <div className="flex flex-col items-center">
                   <div className="w-4 h-4 bg-dark-blue rounded-full"></div>
-                  {index < chamado.historico!.length - 1 && (
+                  {index < ticket.historico!.length - 1 && (
                     <div className="w-0.5 h-16 bg-gray-300 mt-2"></div>
                   )}
                 </div>

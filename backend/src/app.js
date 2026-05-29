@@ -3,7 +3,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import chamadosRoutes from './routes/chamadosRoutes.js';
+import ticketsRoutes from './routes/ticketsRoutes.js';
 
 // Carrega variáveis de ambiente
 dotenv.config();
@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas
-app.use('/api', chamadosRoutes);
+app.use('/api', ticketsRoutes);
 
 // Rota raiz para verificar se o servidor está ativo
 app.get('/', (req, res) => {

@@ -1,405 +1,213 @@
-# 🎫 Sistema Interno de Chamados - VT Innovation
+# Sistema Interno de Chamados - VT Innovation
 
-Sistema centralizado para gerenciar demandas internas da equipe de tecnologia da VT Innovation. Permite criar, acompanhar e resolver tickets de bugs, suportes, melhorias, acessos e incidentes, com integração automática ao Slack.
+MVP acadêmico desenvolvido para centralizar demandas técnicas internas da VT Innovation. O sistema permite abrir chamados, acompanhar status, filtrar demandas, consultar detalhes e registrar histórico de atualização.
 
-## 📋 Tabela de Conteúdos
+Este repositório acompanha o Projeto de Extensão V do curso de Análise e Desenvolvimento de Sistemas da Descomplica. O código é a fonte de verdade da documentação.
 
-- [Descrição](#descrição)
-- [Pré-requisitos](#pré-requisitos)
-- [Instalação e Execução](#instalação-e-execução)
-- [Configuração do Slack](#configuração-do-slack)
-- [Endpoints da API](#endpoints-da-api)
-- [Estrutura do Projeto](#estrutura-do-projeto)
+## Status
 
-## 📝 Descrição
+- Frontend Next.js implementado
+- Backend Node.js/Express implementado
+- Banco SQLite local implementado
+- CRUD principal de chamados implementado
+- Histórico de status implementado
+- Estrutura de integração com Slack preparada
+- Estrutura de integração com Jira preparada
+- Integrações externas dependem de autorização/configuração da empresa
 
-Este é um sistema full-stack desenvolvido para a **VT Innovation** que centraliza todas as demandas internas da equipe de tecnologia. Com ele, é possível:
+## Funcionalidades
 
-- ✅ Criar novos chamados com título, tipo, descrição, urgência e responsável
-- ✅ Filtrar chamados por status, tipo e urgência
-- ✅ Acompanhar o histórico completo de cada chamado
-- ✅ Atualizar status com observações
-- ✅ Receber notificações automáticas no Slack
-- ✅ Visualizar resumos em dashboard intuitivo
+- Criar chamados com título, tipo, descrição, urgência, responsável e prazo esperado
+- Listar chamados no dashboard
+- Filtrar chamados por status, tipo e urgência
+- Visualizar detalhe individual do chamado
+- Atualizar status com observação
+- Registrar histórico de mudanças de status
+- Listar usuários responsáveis cadastrados no seed
 
-## 🛠️ Pré-requisitos
+## Arquitetura
 
-- **Node.js 18+** (verifique com `node --version`)
-- **npm** (incluído no Node.js)
-- **Conta Slack** com permissão para criar Webhooks (opcional, para notificações)
+```mermaid
+flowchart LR
+  User[Usuário] --> Frontend[Next.js]
+  Frontend --> API[Node.js/Express]
+  API --> DB[(SQLite)]
+  API -. autorização pendente .-> Slack[Slack Webhook]
+  API -. autorização pendente .-> Jira[Jira API]
+```
 
-## 🚀 Instalação e Execução
+## Tecnologias
 
-### 1. Backend
+- Frontend: Next.js 14, React, TypeScript, Tailwind CSS
+- Backend: Node.js, Express
+- Banco de dados: SQLite com better-sqlite3
+- Integrações preparadas: Slack Webhook e Jira API
+
+## Pré-requisitos
+
+- Node.js 18+
+- npm
+
+## Execução Local
+
+### Backend
 
 ```bash
-# Acesse a pasta backend
 cd backend
-
-# Instale as dependências
 npm install
-
-# Copie o arquivo de exemplo de variáveis de ambiente
 cp .env.example .env
-
-# Configure o arquivo .env com seus dados (Slack Webhook, porta, etc)
-# Abra backend/.env e preencha as variáveis conforme necessário
-
-# Crie e popule o banco de dados com usuários de teste
 npm run seed
-
-# Inicie o servidor de desenvolvimento
 npm run dev
-
-# Ou para produção:
-npm start
 ```
 
-O servidor estará disponível em **http://localhost:3001** (ou a porta configurada em .env)
+Servidor: `http://localhost:3001`
 
-### 2. Frontend
+### Frontend
 
 ```bash
-# Em outro terminal, acesse a pasta frontend
 cd frontend
-
-# Instale as dependências
 npm install
-
-# Copie o arquivo de exemplo de variáveis de ambiente
 cp .env.local.example .env.local
-
-# Configure o URL da API em .env.local se necessário
-# (padrão: http://localhost:3001)
-
-# Inicie o servidor de desenvolvimento
 npm run dev
-
-# Ou para build e produção:
-npm run build
-npm start
 ```
 
-O frontend estará disponível em **http://localhost:3000**
+Aplicação: `http://localhost:3000`
 
-## 🔧 Configuração do Slack
+## Variáveis de Ambiente
 
-### Como obter o Webhook URL:
+Backend (`backend/.env`):
 
-1. Acesse sua workspace no Slack: https://api.slack.com/apps
-2. Clique em **"Create New App"** → **"From scratch"**
-3. Nomeie a app (ex: "VT Innovation Chamados")
-4. Selecione sua workspace
-5. Vá para **Incoming Webhooks** no menu esquerdo
-6. Ative **Incoming Webhooks**
-7. Clique em **"Add New Webhook to Workspace"**
-8. Selecione o canal onde quer receber notificações
-9. Copie a URL do webhook (começa com `https://hooks.slack.com/...`)
-10. Cole a URL em `backend/.env` na variável `SLACK_WEBHOOK_URL`
-
-### Exemplo de .env configurado:
-
-```
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+```env
+SLACK_WEBHOOK_URL=
 PORT=3001
 FRONTEND_URL=http://localhost:3000
 ```
 
-## 📡 Endpoints da API
+Frontend (`frontend/.env.local`):
 
-Todos os endpoints estão prefixados com `/api`
-
-### Criar Chamado
-
-**POST** `/api/chamados`
-
-Cria um novo chamado e envia notificação ao Slack.
-
-**Headers:**
-```
-Content-Type: application/json
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-**Body:**
+`SLACK_WEBHOOK_URL` deve permanecer vazio enquanto a empresa não autorizar o uso do webhook.
+
+## Endpoints
+
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/` | Verificação do backend |
+| `GET` | `/api/usuarios` | Lista usuários responsáveis |
+| `POST` | `/api/chamados` | Cria chamado |
+| `GET` | `/api/chamados` | Lista chamados com filtros opcionais |
+| `GET` | `/api/chamados/:id` | Retorna detalhe e histórico |
+| `PATCH` | `/api/chamados/:id` | Atualiza status e registra histórico |
+
+### Exemplo de criação
+
 ```json
 {
   "titulo": "Corrigir bug na autenticação",
   "tipo": "Bug",
-  "descricao": "Usuários não conseguem fazer login com Google",
+  "descricao": "Usuários não conseguem acessar a área interna",
   "urgencia": "Alta",
-  "responsavel_id": "fb33bc13e38bfc71bb1571a41d7fa077",
+  "responsavel_id": "id-do-usuario",
   "prazo_esperado": "2026-06-05"
 }
 ```
 
-**Response (201 Created):**
-```json
-{
-  "id": "6f15d169-c25b-4a08-8287-27d48def6fd2",
-  "titulo": "Corrigir bug na autenticação",
-  "tipo": "Bug",
-  "descricao": "Usuários não conseguem fazer login com Google",
-  "urgencia": "Alta",
-  "status": "Aberto",
-  "responsavel_id": "fb33bc13e38bfc71bb1571a41d7fa077",
-  "prazo_esperado": "2026-06-05",
-  "created_at": "2026-05-29 19:59:37",
-  "updated_at": "2026-05-29 19:59:37"
-}
-```
+## Banco de Dados
 
-### Listar Chamados
+O banco é criado automaticamente em `backend/database.sqlite`.
 
-**GET** `/api/chamados?status=Aberto&tipo=Bug&urgencia=Alta`
+Tabelas:
 
-Lista todos os chamados com filtros opcionais.
+- `usuarios`: responsáveis disponíveis para atribuição
+- `chamados`: chamados registrados
+- `historico_chamados`: mudanças de status com observação
 
-**Query Parameters:**
-- `status` (opcional): "Aberto", "Em Andamento" ou "Concluído"
-- `tipo` (opcional): "Bug", "Suporte", "Melhoria", "Acesso" ou "Incidente"
-- `urgencia` (opcional): "Baixa", "Média", "Alta" ou "Crítica"
+MER simplificado:
 
-**Response (200 OK):**
-```json
-[
-  {
-    "id": "6f15d169-c25b-4a08-8287-27d48def6fd2",
-    "titulo": "Corrigir bug na autenticação",
-    "tipo": "Bug",
-    "descricao": "...",
-    "urgencia": "Alta",
-    "status": "Aberto",
-    "responsavel_id": "fb33bc13e38bfc71bb1571a41d7fa077",
-    "prazo_esperado": "2026-06-05",
-    "created_at": "2026-05-29 19:59:37",
-    "updated_at": "2026-05-29 19:59:37"
+```mermaid
+erDiagram
+  usuarios ||--o{ chamados : "responsavel"
+  chamados ||--o{ historico_chamados : "historico"
+
+  usuarios {
+    text id PK
+    text nome
+    text email
+    text setor
+    text created_at
   }
-]
-```
 
-### Obter Chamado com Histórico
-
-**GET** `/api/chamados/:id`
-
-Retorna os detalhes completos de um chamado incluindo informações do responsável e histórico.
-
-**Response (200 OK):**
-```json
-{
-  "id": "6f15d169-c25b-4a08-8287-27d48def6fd2",
-  "titulo": "Corrigir bug na autenticação",
-  "tipo": "Bug",
-  "descricao": "...",
-  "urgencia": "Alta",
-  "status": "Em Andamento",
-  "responsavel_id": "fb33bc13e38bfc71bb1571a41d7fa077",
-  "responsavel_nome": "Vitor Silva",
-  "responsavel_email": "vitor@vtinnovation.com.br",
-  "responsavel_setor": "Tech Lead",
-  "prazo_esperado": "2026-06-05",
-  "created_at": "2026-05-29 19:59:37",
-  "updated_at": "2026-05-29 20:00:17",
-  "historico": [
-    {
-      "id": "24861dc7-d0a8-4660-9f09-b20122d39fed",
-      "chamado_id": "6f15d169-c25b-4a08-8287-27d48def6fd2",
-      "status_anterior": "Aberto",
-      "status_novo": "Em Andamento",
-      "observacao": "Iniciado o trabalho no chamado",
-      "created_at": "2026-05-29 20:00:17"
-    }
-  ]
-}
-```
-
-### Atualizar Status do Chamado
-
-**PATCH** `/api/chamados/:id`
-
-Atualiza o status de um chamado e registra o histórico.
-
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body:**
-```json
-{
-  "status_novo": "Em Andamento",
-  "observacao": "Iniciado o trabalho no chamado"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "id": "6f15d169-c25b-4a08-8287-27d48def6fd2",
-  "status": "Em Andamento",
-  "updated_at": "2026-05-29 20:00:17",
-  "historico_registrado": {
-    "id": "24861dc7-d0a8-4660-9f09-b20122d39fed",
-    "status_anterior": "Aberto",
-    "status_novo": "Em Andamento",
-    "observacao": "Iniciado o trabalho no chamado",
-    "created_at": "2026-05-29 20:00:17"
+  chamados {
+    text id PK
+    text titulo
+    text tipo
+    text descricao
+    text urgencia
+    text status
+    text responsavel_id FK
+    text prazo_esperado
+    text created_at
+    text updated_at
   }
-}
-```
 
-### Listar Usuários
-
-**GET** `/api/usuarios`
-
-Lista todos os usuários disponíveis para atribuição de chamados.
-
-**Response (200 OK):**
-```json
-[
-  {
-    "id": "fb33bc13e38bfc71bb1571a41d7fa077",
-    "nome": "Vitor Silva",
-    "email": "vitor@vtinnovation.com.br",
-    "setor": "Tech Lead",
-    "created_at": "2026-05-29 18:41:25"
-  },
-  {
-    "id": "0add1dcdc03c3af5e8a6e0dd872a0b93",
-    "nome": "Ana Costa",
-    "email": "ana@vtinnovation.com.br",
-    "setor": "Frontend",
-    "created_at": "2026-05-29 18:41:25"
-  },
-  {
-    "id": "f5c738e9e447bdeed83d09efd30269bc",
-    "nome": "Bruno Lima",
-    "email": "bruno@vtinnovation.com.br",
-    "setor": "Backend",
-    "created_at": "2026-05-29 18:41:25"
-  },
-  {
-    "id": "d85a2222bcfd570e05a5b942d32a29e1",
-    "nome": "Carla Souza",
-    "email": "carla@vtinnovation.com.br",
-    "setor": "Design",
-    "created_at": "2026-05-29 18:41:25"
+  historico_chamados {
+    text id PK
+    text chamado_id FK
+    text status_anterior
+    text status_novo
+    text observacao
+    text created_at
   }
-]
 ```
 
-## 📁 Estrutura do Projeto
+## Estrutura
 
-```
-vt-innovation-sistema-chamados/
-├── backend/
-│   ├── src/
-│   │   ├── app.js                 # Configuração do Express
-│   │   ├── controllers/
-│   │   │   └── chamadosController.js  # Lógica dos endpoints
-│   │   ├── database/
-│   │   │   ├── db.js              # Inicialização SQLite
-│   │   │   └── seed.js            # Dados de teste
-│   │   ├── routes/
-│   │   │   └── chamadosRoutes.js  # Definição das rotas
-│   │   └── services/
-│   │       └── slackService.js    # Integração com Slack
-│   ├── package.json
-│   ├── .env.example
-│   ├── .env (não commitar)
-│   ├── .gitignore
-│   └── database.sqlite (criado automaticamente)
-│
-├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── layout.tsx         # Layout raiz
-│   │   │   ├── page.tsx           # Dashboard
-│   │   │   ├── novo/
-│   │   │   │   └── page.tsx       # Formulário novo chamado
-│   │   │   ├── chamados/
-│   │   │   │   └── [id]/
-│   │   │   │       └── page.tsx   # Detalhes do chamado
-│   │   │   └── globals.css        # Estilos globais Tailwind
-│   │   ├── components/
-│   │   │   ├── Header.tsx         # Cabeçalho
-│   │   │   ├── StatusBadge.tsx    # Badge de status
-│   │   │   ├── UrgenciaBadge.tsx  # Badge de urgência
-│   │   │   ├── ChamadoCard.tsx    # Card do chamado
-│   │   │   └── ChamadoForm.tsx    # Formulário
-│   │   └── lib/
-│   │       └── api.ts            # Funções de API
-│   ├── package.json
-│   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   ├── tsconfig.json
-│   ├── next.config.js
-│   ├── .env.local.example
-│   ├── .env.local (não commitar)
-│   └── .gitignore
-│
-└── README.md (este arquivo)
+```text
+backend/
+  src/
+    app.js
+    controllers/ticketsController.js
+    database/db.js
+    database/seed.js
+    routes/ticketsRoutes.js
+    services/slackService.js
+    services/jiraService.js
+frontend/
+  src/
+    app/
+      page.tsx
+      novo/page.tsx
+      chamados/[id]/page.tsx
+    components/
+      Header.tsx
+      StatusBadge.tsx
+      PriorityBadge.tsx
+      TicketCard.tsx
+      TicketForm.tsx
+    lib/api.ts
+docs/
+  pex-v-vt-innovation-revisado.md
 ```
 
-## 🗄️ Banco de Dados
+## Evidências Recomendadas
 
-O sistema utiliza **SQLite com better-sqlite3** para armazenamento. O arquivo `database.sqlite` é criado automaticamente na raiz do backend ao rodar o seed.
+Adicionar ao repositório, em `docs/evidencias/`:
 
-**Tabelas:**
+- Print do formulário de abertura
+- Print do dashboard
+- Print da tela de detalhe com histórico
+- Print da execução local do backend
+- Print do build do frontend
+- Print do schema ou trecho do banco SQLite
+- Print da notificação Slack apenas após autorização da empresa
 
-- **usuarios**: Usuários da equipe
-- **chamados**: Registros de chamados
-- **historico_chamados**: Histórico de atualizações de status
+## Limitações Conhecidas
 
-**IMPORTANTE:** O arquivo `database.sqlite` não deve ser commitado no Git. Está configurado em `.gitignore`.
-
-## 🎨 Design e UX
-
-- **Paleta de cores**: Azul escuro (#1e3a5f) como cor primária, neutros em cinza
-- **Responsivo**: Interface adaptada para desktop e mobile
-- **Sem bibliotecas externas**: Componentes construídos com Tailwind CSS puro
-- **Badges intuitivas**:
-  - Status: Azul (Aberto), Amarelo (Em Andamento), Verde (Concluído)
-  - Urgência: Vermelha (Crítica), Laranja (Alta), Amarela (Média), Verde (Baixa)
-
-## 🔐 Segurança
-
-- Validação de campos obrigatórios no backend e frontend
-- Prepared statements em todas as queries SQL (prevenção de SQL injection)
-- CORS habilitado para requisições entre frontend e backend
-- Variáveis sensíveis em `.env` (não commitadas)
-
-## 📦 Dependências
-
-### Backend
-- `express` - Framework web
-- `better-sqlite3` - Banco de dados SQLite
-- `cors` - Cross-origin resource sharing
-- `dotenv` - Gerenciamento de variáveis de ambiente
-- `axios` - HTTP client para Slack
-
-### Frontend
-- `next` - Framework React
-- `react` - Biblioteca UI
-- `tailwindcss` - Utilitários CSS
-- `typescript` - Type safety
-
-## 🤝 Contribuição
-
-Para adicionar novos recursos:
-
-1. Crie uma branch para sua feature
-2. Desenvolva seguindo a estrutura existente
-3. Teste no backend e frontend
-4. Faça um commit com mensagem descritiva
-
-## 📞 Suporte
-
-Para dúvidas ou problemas:
-- Verifique se Node.js 18+ está instalado
-- Confirme que as portas 3000 (frontend) e 3001 (backend) estão livres
-- Verifique o arquivo `.env` está preenchido corretamente
-- Check the logs for error messages
-
----
-
-**Desenvolvido para VT Innovation** ✨
+- Não há autenticação de usuários
+- Não há deploy público configurado
+- Não há testes automatizados
+- Slack e Jira estão preparados estruturalmente, mas dependem de autorização e credenciais da empresa
+- O escopo foi mantido simples para atender ao objetivo do Projeto de Extensão V

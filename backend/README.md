@@ -1,6 +1,6 @@
 # Backend - Sistema de Chamados VT Innovation
 
-Servidor Node.js + Express com banco de dados SQLite para gerenciar chamados e integração com Slack.
+Servidor Node.js + Express com banco de dados SQLite para gerenciar chamados. As estruturas para Slack e Jira estão preparadas, mas dependem de autorização e credenciais da empresa.
 
 ## 🚀 Início Rápido
 
@@ -10,7 +10,7 @@ npm install
 
 # Configure as variáveis de ambiente
 cp .env.example .env
-# Edite .env e preencha SLACK_WEBHOOK_URL (opcional)
+# Mantenha SLACK_WEBHOOK_URL vazio até autorização da empresa
 
 # Crie o banco de dados com dados de teste
 npm run seed
@@ -33,7 +33,7 @@ Veja o README raiz para documentação completa dos endpoints.
 
 Resumo:
 - `POST /api/chamados` - Criar chamado
-- `GET /api/chamados` - Listar chamados (com filtros)
+- `GET /api/chamados` - Listar chamados com filtros
 - `GET /api/chamados/:id` - Obter chamado com histórico
 - `PATCH /api/chamados/:id` - Atualizar status
 - `GET /api/usuarios` - Listar usuários
@@ -50,7 +50,7 @@ Arquivo: `database.sqlite` (criado automaticamente)
 Variáveis de ambiente (`.env`):
 
 ```
-SLACK_WEBHOOK_URL=https://hooks.slack.com/...  # Opcional
+SLACK_WEBHOOK_URL=
 PORT=3001
 FRONTEND_URL=http://localhost:3000
 ```
@@ -60,9 +60,10 @@ FRONTEND_URL=http://localhost:3000
 ```
 src/
 ├── app.js                # Entrada do servidor
-├── controllers/          # Lógica dos endpoints
-├── routes/              # Definição de rotas
-├── services/            # Serviços (Slack, etc)
+├── controllers/ticketsController.js
+├── routes/ticketsRoutes.js
+├── services/slackService.js
+├── services/jiraService.js
 └── database/            # SQLite e seed
 ```
 

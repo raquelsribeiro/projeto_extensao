@@ -1,12 +1,12 @@
-// frontend/src/components/UrgenciaBadge.tsx
+// frontend/src/components/PriorityBadge.tsx
 
-interface UrgenciaBadgeProps {
-  urgencia: string;
+interface PriorityBadgeProps {
+  urgency: string;
 }
 
-export default function UrgenciaBadge({ urgencia }: UrgenciaBadgeProps) {
-  const getUrgenciaColor = (urgencia: string) => {
-    switch (urgencia) {
+export default function PriorityBadge({ urgency }: PriorityBadgeProps) {
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
       case 'Crítica':
         return 'bg-red-100 text-red-800';
       case 'Alta':
@@ -20,8 +20,8 @@ export default function UrgenciaBadge({ urgencia }: UrgenciaBadgeProps) {
     }
   };
 
-  const getUrgenciaEmoji = (urgencia: string) => {
-    switch (urgencia) {
+  const getPriorityEmoji = (priority: string) => {
+    switch (priority) {
       case 'Crítica':
         return '🔴';
       case 'Alta':
@@ -36,8 +36,8 @@ export default function UrgenciaBadge({ urgencia }: UrgenciaBadgeProps) {
   };
 
   return (
-    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getUrgenciaColor(urgencia)}`}>
-      {getUrgenciaEmoji(urgencia)} {urgencia}
+    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getPriorityColor(urgency)}`}>
+      {getPriorityEmoji(urgency)} {urgency}
     </span>
   );
 }

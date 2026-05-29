@@ -1,17 +1,17 @@
-// frontend/src/components/ChamadoForm.tsx
+// frontend/src/components/TicketForm.tsx
 
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Usuario, criarChamado, buscarUsuarios } from '@/lib/api';
+import { User, createTicket, fetchUsers } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 const TIPOS_CHAMADO = ['Bug', 'Suporte', 'Melhoria', 'Acesso', 'Incidente'];
 const URGENCIAS = ['Baixa', 'Média', 'Alta', 'Crítica'];
 
-export default function ChamadoForm() {
+export default function TicketForm() {
   const router = useRouter();
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
 
@@ -25,16 +25,16 @@ export default function ChamadoForm() {
   });
 
   useEffect(() => {
-    const carregarUsuarios = async () => {
+    const loadUsers = async () => {
       try {
-        const dados = await buscarUsuarios();
-        setUsuarios(dados);
+        const data = await fetchUsers();
+        setUsers(data);
       } catch (err) {
         setErro('Erro ao carregar usuários');
         console.error(err);
       }
     };
-    carregarUsuarios();
+    loadUsers();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -58,7 +58,7 @@ export default function ChamadoForm() {
     setLoading(true);
 
     try {
-      const dadosParaEnviar = {
+      const payload = {
         titulo: formData.titulo,
         tipo: formData.tipo,
         descricao: formData.descricao,
@@ -67,7 +67,7 @@ export default function ChamadoForm() {
         ...(formData.prazo_esperado && { prazo_esperado: formData.prazo_esperado }),
       };
 
-      await criarChamado(dadosParaEnviar);
+      await createTicket(payload);
       router.push('/');
     } catch (err) {
       setErro('Erro ao criar chamado. Tente novamente.');
@@ -153,9 +153,9 @@ export default function ChamadoForm() {
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue"
         >
           <option value="">Nenhum</option>
-          {usuarios.map((usuario) => (
-            <option key={usuario.id} value={usuario.id}>
-              {usuario.nome} ({usuario.setor})
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.nome} ({user.setor})
             </option>
           ))}
         </select>

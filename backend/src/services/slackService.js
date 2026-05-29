@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const getUrgenciaEmoji = (urgencia) => {
+const getPriorityEmoji = (urgencia) => {
   const emojiMap = {
     'Crítica': '🔴',
     'Alta': '🟠',
@@ -12,7 +12,7 @@ const getUrgenciaEmoji = (urgencia) => {
   return emojiMap[urgencia] || '⚪';
 };
 
-const enviarNotificacaoSlack = async (chamado, frontendUrl, responsavelNome) => {
+const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) => {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
@@ -21,7 +21,7 @@ const enviarNotificacaoSlack = async (chamado, frontendUrl, responsavelNome) => 
   }
 
   try {
-    const urgenciaEmoji = getUrgenciaEmoji(chamado.urgencia);
+    const urgenciaEmoji = getPriorityEmoji(chamado.urgencia);
 
     const blocks = [
       {
@@ -102,4 +102,4 @@ const enviarNotificacaoSlack = async (chamado, frontendUrl, responsavelNome) => 
   }
 };
 
-export { enviarNotificacaoSlack };
+export { notifySlackTicketCreated };

@@ -2,7 +2,7 @@
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-export interface Usuario {
+export interface User {
   id: string;
   nome: string;
   email: string;
@@ -10,7 +10,7 @@ export interface Usuario {
   created_at: string;
 }
 
-export interface HistoricoChamado {
+export interface TicketHistory {
   id: string;
   chamado_id: string;
   status_anterior: string | null;
@@ -19,7 +19,7 @@ export interface HistoricoChamado {
   created_at: string;
 }
 
-export interface Chamado {
+export interface Ticket {
   id: string;
   titulo: string;
   tipo: string;
@@ -33,11 +33,11 @@ export interface Chamado {
   prazo_esperado: string | null;
   created_at: string;
   updated_at: string;
-  historico?: HistoricoChamado[];
+  historico?: TicketHistory[];
 }
 
 // GET /api/usuarios
-export async function buscarUsuarios(): Promise<Usuario[]> {
+export async function fetchUsers(): Promise<User[]> {
   try {
     const response = await fetch(`${API_URL}/api/usuarios`);
     if (!response.ok) throw new Error('Erro ao buscar usuários');
@@ -49,11 +49,11 @@ export async function buscarUsuarios(): Promise<Usuario[]> {
 }
 
 // GET /api/chamados
-export async function buscarChamados(filtros?: {
+export async function fetchTickets(filtros?: {
   status?: string;
   tipo?: string;
   urgencia?: string;
-}): Promise<Chamado[]> {
+}): Promise<Ticket[]> {
   try {
     let url = `${API_URL}/api/chamados`;
 
@@ -78,7 +78,7 @@ export async function buscarChamados(filtros?: {
 }
 
 // GET /api/chamados/:id
-export async function buscarChamadoPorId(id: string): Promise<Chamado> {
+export async function fetchTicketById(id: string): Promise<Ticket> {
   try {
     const response = await fetch(`${API_URL}/api/chamados/${id}`);
     if (!response.ok) throw new Error('Chamado não encontrado');
@@ -90,14 +90,14 @@ export async function buscarChamadoPorId(id: string): Promise<Chamado> {
 }
 
 // POST /api/chamados
-export async function criarChamado(dados: {
+export async function createTicket(dados: {
   titulo: string;
   tipo: string;
   descricao: string;
   urgencia: string;
   responsavel_id?: string;
   prazo_esperado?: string;
-}): Promise<Chamado> {
+}): Promise<Ticket> {
   try {
     const response = await fetch(`${API_URL}/api/chamados`, {
       method: 'POST',
@@ -116,7 +116,7 @@ export async function criarChamado(dados: {
 }
 
 // PATCH /api/chamados/:id
-export async function atualizarChamado(
+export async function updateTicketStatus(
   id: string,
   dados: {
     status_novo: string;

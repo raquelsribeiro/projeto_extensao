@@ -3,8 +3,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ChamadoCard from '@/components/ChamadoCard';
-import { buscarChamados, Chamado } from '@/lib/api';
+import TicketCard from '@/components/TicketCard';
+import { fetchTickets, Ticket } from '@/lib/api';
 import Link from 'next/link';
 
 const TIPOS_CHAMADO = ['Bug', 'Suporte', 'Melhoria', 'Acesso', 'Incidente'];
@@ -12,30 +12,30 @@ const URGENCIAS = ['Baixa', 'Média', 'Alta', 'Crítica'];
 const STATUS_OPCOES = ['Aberto', 'Em Andamento', 'Concluído'];
 
 export default function Dashboard() {
-  const [chamados, setChamados] = useState<Chamado[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
 
-  const [filtros, setFiltros] = useState({
+  const [filters, setFilters] = useState({
     status: '',
     tipo: '',
     urgencia: '',
   });
 
   useEffect(() => {
-    carregarChamados();
-  }, [filtros]);
+    loadTickets();
+  }, [filters]);
 
-  const carregarChamados = async () => {
+  const loadTickets = async () => {
     try {
       setLoading(true);
       setErro('');
-      const dados = await buscarChamados({
-        status: filtros.status || undefined,
-        tipo: filtros.tipo || undefined,
-        urgencia: filtros.urgencia || undefined,
+      const data = await fetchTickets({
+        status: filters.status || undefined,
+        tipo: filters.tipo || undefined,
+        urgencia: filters.urgencia || undefined,
       });
-      setChamados(dados);
+      setTickets(data);
     } catch (err) {
       setErro('Erro ao carregar chamados');
       console.error(err);
@@ -45,14 +45,14 @@ export default function Dashboard() {
   };
 
   const resumo = {
-    aberto: chamados.filter((c) => c.status === 'Aberto').length,
-    emAndamento: chamados.filter((c) => c.status === 'Em Andamento').length,
-    concluido: chamados.filter((c) => c.status === 'Concluído').length,
+    aberto: tickets.filter((ticket) => ticket.status === 'Aberto').length,
+    emAndamento: tickets.filter((ticket) => ticket.status === 'Em Andamento').length,
+    concluido: tickets.filter((ticket) => ticket.status === 'Concluído').length,
   };
 
-  const handleFiltroChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFiltros((prev) => ({
+    setFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -99,8 +99,8 @@ export default function Dashboard() {
             <select
               id="status"
               name="status"
-              value={filtros.status}
-              onChange={handleFiltroChange}
+              value={filters.status}
+              onChange={handleFilterChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue"
             >
               <option value="">Todos</option>
@@ -119,8 +119,8 @@ export default function Dashboard() {
             <select
               id="tipo"
               name="tipo"
-              value={filtros.tipo}
-              onChange={handleFiltroChange}
+              value={filters.tipo}
+              onChange={handleFilterChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue"
             >
               <option value="">Todos</option>
@@ -139,8 +139,8 @@ export default function Dashboard() {
             <select
               id="urgencia"
               name="urgencia"
-              value={filtros.urgencia}
-              onChange={handleFiltroChange}
+              value={filters.urgencia}
+              onChange={handleFilterChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue"
             >
               <option value="">Todos</option>
@@ -165,7 +165,7 @@ export default function Dashboard() {
         <div className="text-center py-12">
           <p className="text-gray-500">Carregando chamados...</p>
         </div>
-      ) : chamados.length === 0 ? (
+      ) : tickets.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">Nenhum chamado encontrado</p>
           <Link href="/novo" className="text-dark-blue font-semibold hover:underline mt-2 inline-block">
@@ -174,8 +174,8 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {chamados.map((chamado) => (
-            <ChamadoCard key={chamado.id} chamado={chamado} />
+          {tickets.map((ticket) => (
+            <TicketCard key={ticket.id} ticket={ticket} />
           ))}
         </div>
       )}

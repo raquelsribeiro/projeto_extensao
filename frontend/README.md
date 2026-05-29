@@ -43,8 +43,13 @@ src/
 │   │   └── page.tsx         # Novo chamado
 │   └── chamados/
 │       └── [id]/
-│           └── page.tsx     # Detalhe champado
+│           └── page.tsx     # Detalhe do chamado
 ├── components/              # Componentes reutilizáveis
+│   ├── Header.tsx
+│   ├── StatusBadge.tsx
+│   ├── PriorityBadge.tsx
+│   ├── TicketCard.tsx
+│   └── TicketForm.tsx
 └── lib/
     └── api.ts              # Funções de requisição
 ```

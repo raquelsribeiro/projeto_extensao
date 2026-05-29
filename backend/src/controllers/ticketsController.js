@@ -1,15 +1,14 @@
-// backend/src/controllers/chamadosController.js
+// backend/src/controllers/ticketsController.js
 
 import { randomUUID } from 'crypto';
 import db from '../database/db.js';
-import { enviarNotificacaoSlack } from '../services/slackService.js';
+import { notifySlackTicketCreated } from '../services/slackService.js';
 
-// POST /api/chamados - Cria um novo chamado
-export const criarChamado = async (req, res) => {
+// POST /api/chamados - Create a new ticket
+export const createTicket = async (req, res) => {
   try {
     const { titulo, tipo, descricao, urgencia, responsavel_id, prazo_esperado } = req.body;
 
-    // Validação básica
     if (!titulo || !tipo || !descricao || !urgencia) {
       return res.status(400).json({ erro: 'Campos obrigatórios faltando' });
     }
@@ -17,13 +16,12 @@ export const criarChamado = async (req, res) => {
     const id = randomUUID();
     const agora = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
-    // Insere o chamado no banco
-    const insertChamado = db.prepare(`
+    const insertTicket = db.prepare(`
       INSERT INTO chamados (id, titulo, tipo, descricao, urgencia, responsavel_id, prazo_esperado, created_at, updated_at, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    insertChamado.run(
+    insertTicket.run(
       id,
       titulo,
       tipo,
@@ -36,15 +34,13 @@ export const criarChamado = async (req, res) => {
       'Aberto'
     );
 
-    // Busca o responsável para exibir no Slack
-    let responsavelNome = 'Não atribuído';
+    let responsibleName = 'Não atribuído';
     if (responsavel_id) {
       const responsavel = db.prepare('SELECT nome FROM usuarios WHERE id = ?').get(responsavel_id);
-      responsavelNome = responsavel?.nome || 'Desconhecido';
+      responsibleName = responsavel?.nome || 'Desconhecido';
     }
 
-    // Prepara dados para notificação Slack
-    const chamado = {
+    const ticket = {
       id,
       titulo,
       tipo,
@@ -54,7 +50,7 @@ export const criarChamado = async (req, res) => {
     };
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    await enviarNotificacaoSlack(chamado, frontendUrl, responsavelNome);
+    await notifySlackTicketCreated(ticket, frontendUrl, responsibleName);
 
     res.status(201).json({
       id,
@@ -74,12 +70,21 @@ export const criarChamado = async (req, res) => {
   }
 };
 
-// GET /api/chamados - Lista todos os chamados com filtros
-export const listarChamados = (req, res) => {
+// GET /api/chamados - List tickets with optional filters
+export const listTickets = (req, res) => {
   try {
     const { status, tipo, urgencia } = req.query;
 
-    let query = 'SELECT * FROM chamados WHERE 1=1';
+    let query = `
+      SELECT
+        c.*,
+        u.nome as responsavel_nome,
+        u.email as responsavel_email,
+        u.setor as responsavel_setor
+      FROM chamados c
+      LEFT JOIN usuarios u ON c.responsavel_id = u.id
+      WHERE 1=1
+    `;
     const params = [];
 
     if (status) {
@@ -97,25 +102,24 @@ export const listarChamados = (req, res) => {
       params.push(urgencia);
     }
 
-    query += ' ORDER BY created_at DESC';
+    query += ' ORDER BY c.created_at DESC';
 
     const stmt = db.prepare(query);
-    const chamados = stmt.all(...params);
+    const tickets = stmt.all(...params);
 
-    res.json(chamados);
+    res.json(tickets);
   } catch (error) {
     console.error('Erro ao listar chamados:', error);
     res.status(500).json({ erro: 'Erro ao listar chamados' });
   }
 };
 
-// GET /api/chamados/:id - Retorna um chamado com seus dados e histórico
-export const obterChamado = (req, res) => {
+// GET /api/chamados/:id - Return a ticket with responsible user and history
+export const getTicketById = (req, res) => {
   try {
     const { id } = req.params;
 
-    // Busca o chamado com JOIN do responsável
-    const chamado = db.prepare(`
+    const ticket = db.prepare(`
       SELECT
         c.*,
         u.nome as responsavel_nome,
@@ -126,20 +130,19 @@ export const obterChamado = (req, res) => {
       WHERE c.id = ?
     `).get(id);
 
-    if (!chamado) {
+    if (!ticket) {
       return res.status(404).json({ erro: 'Chamado não encontrado' });
     }
 
-    // Busca o histórico do chamado
-    const historico = db.prepare(`
+    const history = db.prepare(`
       SELECT * FROM historico_chamados
       WHERE chamado_id = ?
       ORDER BY created_at ASC
     `).all(id);
 
     res.json({
-      ...chamado,
-      historico
+      ...ticket,
+      historico: history
     });
   } catch (error) {
     console.error('Erro ao obter chamado:', error);
@@ -147,8 +150,8 @@ export const obterChamado = (req, res) => {
   }
 };
 
-// PATCH /api/chamados/:id - Atualiza o status do chamado e registra no histórico
-export const atualizarChamado = (req, res) => {
+// PATCH /api/chamados/:id - Update ticket status and register history
+export const updateTicketStatus = (req, res) => {
   try {
     const { id } = req.params;
     const { status_novo, observacao } = req.body;
@@ -157,35 +160,32 @@ export const atualizarChamado = (req, res) => {
       return res.status(400).json({ erro: 'Status novo é obrigatório' });
     }
 
-    // Busca o chamado atual
-    const chamado = db.prepare('SELECT * FROM chamados WHERE id = ?').get(id);
+    const ticket = db.prepare('SELECT * FROM chamados WHERE id = ?').get(id);
 
-    if (!chamado) {
+    if (!ticket) {
       return res.status(404).json({ erro: 'Chamado não encontrado' });
     }
 
     const agora = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
-    // Atualiza o chamado
-    const updateChamado = db.prepare(`
+    const updateTicket = db.prepare(`
       UPDATE chamados
       SET status = ?, updated_at = ?
       WHERE id = ?
     `);
 
-    updateChamado.run(status_novo, agora, id);
+    updateTicket.run(status_novo, agora, id);
 
-    // Registra o histórico
-    const historicoId = randomUUID();
-    const insertHistorico = db.prepare(`
+    const historyId = randomUUID();
+    const insertHistory = db.prepare(`
       INSERT INTO historico_chamados (id, chamado_id, status_anterior, status_novo, observacao, created_at)
       VALUES (?, ?, ?, ?, ?, ?)
     `);
 
-    insertHistorico.run(
-      historicoId,
+    insertHistory.run(
+      historyId,
       id,
-      chamado.status,
+      ticket.status,
       status_novo,
       observacao || null,
       agora
@@ -196,8 +196,8 @@ export const atualizarChamado = (req, res) => {
       status: status_novo,
       updated_at: agora,
       historico_registrado: {
-        id: historicoId,
-        status_anterior: chamado.status,
+        id: historyId,
+        status_anterior: ticket.status,
         status_novo,
         observacao,
         created_at: agora
@@ -209,11 +209,11 @@ export const atualizarChamado = (req, res) => {
   }
 };
 
-// GET /api/usuarios - Lista todos os usuários
-export const listarUsuarios = (req, res) => {
+// GET /api/usuarios - List available users
+export const listUsers = (req, res) => {
   try {
-    const usuarios = db.prepare('SELECT * FROM usuarios ORDER BY nome ASC').all();
-    res.json(usuarios);
+    const users = db.prepare('SELECT * FROM usuarios ORDER BY nome ASC').all();
+    res.json(users);
   } catch (error) {
     console.error('Erro ao listar usuários:', error);
     res.status(500).json({ erro: 'Erro ao listar usuários' });
