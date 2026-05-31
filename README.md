@@ -64,6 +64,8 @@ npm run dev
 
 Servidor: `http://localhost:3001`
 
+O comando `npm run seed` cria usuários, chamados e histórico de demonstração para facilitar a visualização do dashboard.
+
 ### Frontend
 
 ```bash
@@ -99,22 +101,22 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | `GET` | `/` | Verificação do backend |
-| `GET` | `/api/usuarios` | Lista usuários responsáveis |
-| `POST` | `/api/chamados` | Cria chamado |
-| `GET` | `/api/chamados` | Lista chamados com filtros opcionais |
-| `GET` | `/api/chamados/:id` | Retorna detalhe e histórico |
-| `PATCH` | `/api/chamados/:id` | Atualiza status e registra histórico |
+| `GET` | `/api/users` | Lista usuários responsáveis |
+| `POST` | `/api/tickets` | Cria chamado |
+| `GET` | `/api/tickets` | Lista chamados com filtros opcionais |
+| `GET` | `/api/tickets/:id` | Retorna detalhe e histórico |
+| `PATCH` | `/api/tickets/:id` | Atualiza status e registra histórico |
 
 ### Exemplo de criação
 
 ```json
 {
-  "titulo": "Corrigir bug na autenticação",
-  "tipo": "Bug",
-  "descricao": "Usuários não conseguem acessar a área interna",
-  "urgencia": "Alta",
-  "responsavel_id": "id-do-usuario",
-  "prazo_esperado": "2026-06-05"
+  "title": "Corrigir bug na autenticação",
+  "type": "Bug",
+  "description": "Usuários não conseguem acessar a área interna",
+  "priority": "Alta",
+  "responsible_id": "id-do-usuario",
+  "expected_due_date": "2026-06-05"
 }
 ```
 
@@ -124,44 +126,44 @@ O banco é criado automaticamente em `backend/database.sqlite`.
 
 Tabelas:
 
-- `usuarios`: responsáveis disponíveis para atribuição
-- `chamados`: chamados registrados
-- `historico_chamados`: mudanças de status com observação
+- `users`: responsáveis disponíveis para atribuição
+- `tickets`: chamados registrados
+- `ticket_history`: mudanças de status com observação
 
 MER simplificado:
 
 ```mermaid
 erDiagram
-  usuarios ||--o{ chamados : "responsavel"
-  chamados ||--o{ historico_chamados : "historico"
+  users ||--o{ tickets : "responsible"
+  tickets ||--o{ ticket_history : "history"
 
-  usuarios {
+  users {
     text id PK
-    text nome
+    text name
     text email
-    text setor
+    text team
     text created_at
   }
 
-  chamados {
+  tickets {
     text id PK
-    text titulo
-    text tipo
-    text descricao
-    text urgencia
+    text title
+    text type
+    text description
+    text priority
     text status
-    text responsavel_id FK
-    text prazo_esperado
+    text responsible_id FK
+    text expected_due_date
     text created_at
     text updated_at
   }
 
-  historico_chamados {
+  ticket_history {
     text id PK
-    text chamado_id FK
-    text status_anterior
-    text status_novo
-    text observacao
+    text ticket_id FK
+    text previous_status
+    text new_status
+    text note
     text created_at
   }
 ```

@@ -10,42 +10,46 @@ const __dirname = path.dirname(__filename);
 const dbPath = path.join(__dirname, '../../database.sqlite');
 const db = new Database(dbPath);
 
-// Habilita foreign keys
 db.pragma('foreign_keys = ON');
 
-// Cria as tabelas se não existirem
 db.exec(`
-  CREATE TABLE IF NOT EXISTS usuarios (
+  CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-    nome TEXT NOT NULL,
+    name TEXT NOT NULL,
     email TEXT NOT NULL,
-    setor TEXT,
+    team TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS chamados (
+  CREATE TABLE IF NOT EXISTS tickets (
     id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-    titulo TEXT NOT NULL,
-    tipo TEXT NOT NULL,
-    descricao TEXT NOT NULL,
-    urgencia TEXT NOT NULL,
+    title TEXT NOT NULL,
+    type TEXT NOT NULL,
+    description TEXT NOT NULL,
+    priority TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'Aberto',
-    responsavel_id TEXT,
-    prazo_esperado TEXT,
+    responsible_id TEXT,
+    expected_due_date TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (responsavel_id) REFERENCES usuarios(id)
+    FOREIGN KEY (responsible_id) REFERENCES users(id)
   );
 
-  CREATE TABLE IF NOT EXISTS historico_chamados (
+  CREATE TABLE IF NOT EXISTS ticket_history (
     id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-    chamado_id TEXT NOT NULL,
-    status_anterior TEXT,
-    status_novo TEXT,
-    observacao TEXT,
+    ticket_id TEXT NOT NULL,
+    previous_status TEXT,
+    new_status TEXT,
+    note TEXT,
     created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (chamado_id) REFERENCES chamados(id)
+    FOREIGN KEY (ticket_id) REFERENCES tickets(id)
   );
+`);
+
+db.exec(`
+  DROP TABLE IF EXISTS historico_chamados;
+  DROP TABLE IF EXISTS chamados;
+  DROP TABLE IF EXISTS usuarios;
 `);
 
 export default db;

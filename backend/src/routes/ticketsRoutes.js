@@ -3,21 +3,19 @@
 import express from 'express';
 import {
   createTicket,
-  listTickets,
   getTicketById,
-  updateTicketStatus,
-  listUsers
+  listTickets,
+  listUsers,
+  updateTicketStatus
 } from '../controllers/ticketsController.js';
 
 const router = express.Router();
 
-// Rotas de chamados
-router.post('/chamados', createTicket);
-router.get('/chamados', listTickets);
-router.get('/chamados/:id', getTicketById);
-router.patch('/chamados/:id', updateTicketStatus);
+router.post('/tickets', createTicket);
+router.get('/tickets', listTickets);
+router.get('/tickets/:id', getTicketById);
+router.patch('/tickets/:id', updateTicketStatus);
 
-// Rotas de usuários
-router.get('/usuarios', listUsers);
+router.get('/users', listUsers);
 
 export default router;

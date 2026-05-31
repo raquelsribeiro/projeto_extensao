@@ -25,23 +25,23 @@ O servidor estará em **http://localhost:3001**
 
 - `npm run dev` - Inicia servidor com reload automático
 - `npm start` - Inicia servidor em modo produção
-- `npm run seed` - Inicializa banco de dados e insere usuários de teste
+- `npm run seed` - Inicializa banco de dados e insere usuários, chamados e histórico de demonstração
 
 ## 📡 Endpoints Disponíveis
 
 Veja o README raiz para documentação completa dos endpoints.
 
 Resumo:
-- `POST /api/chamados` - Criar chamado
-- `GET /api/chamados` - Listar chamados com filtros
-- `GET /api/chamados/:id` - Obter chamado com histórico
-- `PATCH /api/chamados/:id` - Atualizar status
-- `GET /api/usuarios` - Listar usuários
+- `POST /api/tickets` - Criar chamado
+- `GET /api/tickets` - Listar chamados com filtros
+- `GET /api/tickets/:id` - Obter chamado com histórico
+- `PATCH /api/tickets/:id` - Atualizar status
+- `GET /api/users` - Listar usuários
 - `GET /` - Health check
 
 ## 🗄️ Banco de Dados
 
-SQLite local com 3 tabelas: `usuarios`, `chamados`, `historico_chamados`
+SQLite local com 3 tabelas: `users`, `tickets`, `ticket_history`
 
 Arquivo: `database.sqlite` (criado automaticamente)
 

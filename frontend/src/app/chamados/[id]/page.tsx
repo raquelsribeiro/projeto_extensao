@@ -33,8 +33,8 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [updateForm, setUpdateForm] = useState({
-    status_novo: '',
-    observacao: '',
+    new_status: '',
+    note: '',
   });
 
   const loadTicket = async () => {
@@ -45,7 +45,7 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
       setTicket(data);
       setUpdateForm((current) => ({
         ...current,
-        status_novo: data.status,
+        new_status: data.status,
       }));
     } catch (err) {
       setError('Chamado não encontrado');
@@ -69,7 +69,7 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
   const handleUpdate = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!updateForm.status_novo) {
+    if (!updateForm.new_status) {
       setError('Selecione um novo status');
       return;
     }
@@ -79,12 +79,12 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
 
     try {
       await updateTicketStatus(params.id, {
-        status_novo: updateForm.status_novo,
-        observacao: updateForm.observacao || undefined,
+        new_status: updateForm.new_status,
+        note: updateForm.note || undefined,
       });
 
       setShowUpdateModal(false);
-      setUpdateForm({ status_novo: '', observacao: '' });
+      setUpdateForm({ new_status: '', note: '' });
       await loadTicket();
     } catch (err) {
       setError('Erro ao atualizar chamado');
@@ -121,8 +121,8 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
 
   const formattedDate = new Date(ticket.created_at).toLocaleDateString('pt-BR');
   const formattedUpdateDate = new Date(ticket.updated_at).toLocaleDateString('pt-BR');
-  const responsible = ticket.responsavel_nome
-    ? `${ticket.responsavel_nome} (${ticket.responsavel_setor})`
+  const responsible = ticket.responsible_name
+    ? `${ticket.responsible_name} (${ticket.responsible_team})`
     : 'Não atribuído';
 
   return (
@@ -142,9 +142,9 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
             <Stack gap={6} style={{ minWidth: 0 }}>
               <Group gap="xs">
                 <StatusBadge status={ticket.status} />
-                <PriorityBadge urgency={ticket.urgencia} />
+                <PriorityBadge urgency={ticket.priority} />
               </Group>
-              <Title order={1}>{ticket.titulo}</Title>
+              <Title order={1}>{ticket.title}</Title>
               <Text size="sm" c="dimmed">
                 ID: {ticket.id}
               </Text>
@@ -160,7 +160,7 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
             <Card withBorder radius="md" p="md">
               <Text size="xs" c="dimmed" fw={700}>Tipo</Text>
-              <Text fw={600}>{ticket.tipo}</Text>
+              <Text fw={600}>{ticket.type}</Text>
             </Card>
             <Card withBorder radius="md" p="md">
               <Group gap={6}>
@@ -175,7 +175,7 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
                 <Text size="xs" c="dimmed" fw={700}>Prazo</Text>
               </Group>
               <Text fw={600}>
-                {ticket.prazo_esperado ? new Date(ticket.prazo_esperado).toLocaleDateString('pt-BR') : 'Não informado'}
+                {ticket.expected_due_date ? new Date(ticket.expected_due_date).toLocaleDateString('pt-BR') : 'Não informado'}
               </Text>
             </Card>
             <Card withBorder radius="md" p="md">
@@ -186,7 +186,7 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
 
           <Card withBorder radius="md" p="lg">
             <Text size="xs" c="dimmed" fw={700} mb={6}>Descrição</Text>
-            <Text style={{ whiteSpace: 'pre-wrap' }}>{ticket.descricao}</Text>
+            <Text style={{ whiteSpace: 'pre-wrap' }}>{ticket.description}</Text>
           </Card>
 
           <Text size="sm" c="dimmed">
@@ -201,10 +201,10 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
           <Title order={2} size="h3">Histórico de atualizações</Title>
         </Group>
 
-        {ticket.historico && ticket.historico.length > 0 ? (
-          <Timeline active={ticket.historico.length} bulletSize={22} lineWidth={2}>
-            {ticket.historico.map((item) => (
-              <Timeline.Item key={item.id} title={`${item.status_anterior} → ${item.status_novo}`}>
+        {ticket.history && ticket.history.length > 0 ? (
+          <Timeline active={ticket.history.length} bulletSize={22} lineWidth={2}>
+            {ticket.history.map((item) => (
+              <Timeline.Item key={item.id} title={`${item.previous_status} → ${item.new_status}`}>
                 <Text size="sm" c="dimmed">
                   {new Date(item.created_at).toLocaleDateString('pt-BR')} às{' '}
                   {new Date(item.created_at).toLocaleTimeString('pt-BR', {
@@ -212,9 +212,9 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
                     minute: '2-digit',
                   })}
                 </Text>
-                {item.observacao && (
+                {item.note && (
                   <Text size="sm" mt={4}>
-                    {item.observacao}
+                    {item.note}
                   </Text>
                 )}
               </Timeline.Item>
@@ -230,16 +230,16 @@ const TicketDetailsPage = ({ params }: { params: { id: string } }) => {
           <Select
             label="Novo status"
             data={STATUS_OPTIONS}
-            value={updateForm.status_novo || null}
-            onChange={(value) => updateField('status_novo', value)}
+            value={updateForm.new_status || null}
+            onChange={(value) => updateField('new_status', value)}
             required
           />
           <Textarea
             label="Observação"
             placeholder="Adicione uma observação sobre esta mudança"
             minRows={4}
-            value={updateForm.observacao}
-            onChange={(event) => updateField('observacao', event.currentTarget.value)}
+            value={updateForm.note}
+            onChange={(event) => updateField('note', event.currentTarget.value)}
           />
           <Group justify="flex-end">
             <Button variant="default" onClick={() => setShowUpdateModal(false)}>

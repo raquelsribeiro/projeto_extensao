@@ -11,7 +11,7 @@ interface TicketCardProps {
 
 const TicketCard = ({ ticket }: TicketCardProps) => {
   const formattedDate = new Date(ticket.created_at).toLocaleDateString('pt-BR');
-  const responsible = ticket.responsavel_nome || (ticket.responsavel_id ? 'Responsável não carregado' : 'Não atribuído');
+  const responsible = ticket.responsible_name || (ticket.responsible_id ? 'Responsável não carregado' : 'Não atribuído');
 
   return (
     <Card component={Link} href={`/chamados/${ticket.id}`} withBorder shadow="xs" padding="lg" radius="md">
@@ -19,10 +19,10 @@ const TicketCard = ({ ticket }: TicketCardProps) => {
         <Group justify="space-between" align="flex-start" wrap="nowrap">
           <Stack gap={4} style={{ minWidth: 0 }}>
             <Title order={3} size="h4" lineClamp={2}>
-              {ticket.titulo}
+              {ticket.title}
             </Title>
             <Text size="sm" c="dimmed" lineClamp={2}>
-              {ticket.descricao}
+              {ticket.description}
             </Text>
           </Stack>
           <Tooltip label="Ver detalhes">
@@ -34,7 +34,7 @@ const TicketCard = ({ ticket }: TicketCardProps) => {
 
         <Group gap="xs">
           <StatusBadge status={ticket.status} />
-          <PriorityBadge urgency={ticket.urgencia} />
+          <PriorityBadge urgency={ticket.priority} />
         </Group>
 
         <Group justify="space-between" gap="sm">

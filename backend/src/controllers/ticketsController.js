@@ -4,49 +4,68 @@ import { randomUUID } from 'crypto';
 import db from '../database/db.js';
 import { notifySlackTicketCreated } from '../services/slackService.js';
 
-// POST /api/chamados - Create a new ticket
+const getCurrentTimestamp = () => new Date().toISOString().replace('T', ' ').substring(0, 19);
+
 export const createTicket = async (req, res) => {
   try {
-    const { titulo, tipo, descricao, urgencia, responsavel_id, prazo_esperado } = req.body;
+    const {
+      title,
+      type,
+      description,
+      priority,
+      responsible_id,
+      expected_due_date
+    } = req.body;
 
-    if (!titulo || !tipo || !descricao || !urgencia) {
-      return res.status(400).json({ erro: 'Campos obrigatórios faltando' });
+    if (!title || !type || !description || !priority) {
+      return res.status(400).json({ error: 'Required fields are missing' });
     }
 
     const id = randomUUID();
-    const agora = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const now = getCurrentTimestamp();
 
     const insertTicket = db.prepare(`
-      INSERT INTO chamados (id, titulo, tipo, descricao, urgencia, responsavel_id, prazo_esperado, created_at, updated_at, status)
+      INSERT INTO tickets (
+        id,
+        title,
+        type,
+        description,
+        priority,
+        responsible_id,
+        expected_due_date,
+        created_at,
+        updated_at,
+        status
+      )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     insertTicket.run(
       id,
-      titulo,
-      tipo,
-      descricao,
-      urgencia,
-      responsavel_id || null,
-      prazo_esperado || null,
-      agora,
-      agora,
+      title,
+      type,
+      description,
+      priority,
+      responsible_id || null,
+      expected_due_date || null,
+      now,
+      now,
       'Aberto'
     );
 
     let responsibleName = 'Não atribuído';
-    if (responsavel_id) {
-      const responsavel = db.prepare('SELECT nome FROM usuarios WHERE id = ?').get(responsavel_id);
-      responsibleName = responsavel?.nome || 'Desconhecido';
+    if (responsible_id) {
+      const responsible = db.prepare('SELECT name FROM users WHERE id = ?').get(responsible_id);
+      responsibleName = responsible?.name || 'Desconhecido';
     }
 
     const ticket = {
       id,
-      titulo,
-      tipo,
-      descricao,
-      urgencia,
-      prazo_esperado
+      title,
+      type,
+      description,
+      priority,
+      expected_due_date
     };
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -54,168 +73,166 @@ export const createTicket = async (req, res) => {
 
     res.status(201).json({
       id,
-      titulo,
-      tipo,
-      descricao,
-      urgencia,
-      responsavel_id,
-      prazo_esperado,
+      title,
+      type,
+      description,
+      priority,
+      responsible_id: responsible_id || null,
+      expected_due_date: expected_due_date || null,
       status: 'Aberto',
-      created_at: agora,
-      updated_at: agora
+      created_at: now,
+      updated_at: now
     });
   } catch (error) {
-    console.error('Erro ao criar chamado:', error);
-    res.status(500).json({ erro: 'Erro ao criar chamado' });
+    console.error('Error creating ticket:', error);
+    res.status(500).json({ error: 'Error creating ticket' });
   }
 };
 
-// GET /api/chamados - List tickets with optional filters
 export const listTickets = (req, res) => {
   try {
-    const { status, tipo, urgencia } = req.query;
+    const { status, type, priority } = req.query;
 
     let query = `
       SELECT
-        c.*,
-        u.nome as responsavel_nome,
-        u.email as responsavel_email,
-        u.setor as responsavel_setor
-      FROM chamados c
-      LEFT JOIN usuarios u ON c.responsavel_id = u.id
+        t.*,
+        u.name as responsible_name,
+        u.email as responsible_email,
+        u.team as responsible_team
+      FROM tickets t
+      LEFT JOIN users u ON t.responsible_id = u.id
       WHERE 1=1
     `;
     const params = [];
 
     if (status) {
-      query += ' AND status = ?';
+      query += ' AND t.status = ?';
       params.push(status);
     }
 
-    if (tipo) {
-      query += ' AND tipo = ?';
-      params.push(tipo);
+    if (type) {
+      query += ' AND t.type = ?';
+      params.push(type);
     }
 
-    if (urgencia) {
-      query += ' AND urgencia = ?';
-      params.push(urgencia);
+    if (priority) {
+      query += ' AND t.priority = ?';
+      params.push(priority);
     }
 
-    query += ' ORDER BY c.created_at DESC';
+    query += ' ORDER BY t.created_at DESC';
 
-    const stmt = db.prepare(query);
-    const tickets = stmt.all(...params);
+    const tickets = db.prepare(query).all(...params);
 
     res.json(tickets);
   } catch (error) {
-    console.error('Erro ao listar chamados:', error);
-    res.status(500).json({ erro: 'Erro ao listar chamados' });
+    console.error('Error listing tickets:', error);
+    res.status(500).json({ error: 'Error listing tickets' });
   }
 };
 
-// GET /api/chamados/:id - Return a ticket with responsible user and history
 export const getTicketById = (req, res) => {
   try {
     const { id } = req.params;
 
     const ticket = db.prepare(`
       SELECT
-        c.*,
-        u.nome as responsavel_nome,
-        u.email as responsavel_email,
-        u.setor as responsavel_setor
-      FROM chamados c
-      LEFT JOIN usuarios u ON c.responsavel_id = u.id
-      WHERE c.id = ?
+        t.*,
+        u.name as responsible_name,
+        u.email as responsible_email,
+        u.team as responsible_team
+      FROM tickets t
+      LEFT JOIN users u ON t.responsible_id = u.id
+      WHERE t.id = ?
     `).get(id);
 
     if (!ticket) {
-      return res.status(404).json({ erro: 'Chamado não encontrado' });
+      return res.status(404).json({ error: 'Ticket not found' });
     }
 
     const history = db.prepare(`
-      SELECT * FROM historico_chamados
-      WHERE chamado_id = ?
+      SELECT * FROM ticket_history
+      WHERE ticket_id = ?
       ORDER BY created_at ASC
     `).all(id);
 
     res.json({
       ...ticket,
-      historico: history
+      history
     });
   } catch (error) {
-    console.error('Erro ao obter chamado:', error);
-    res.status(500).json({ erro: 'Erro ao obter chamado' });
+    console.error('Error getting ticket:', error);
+    res.status(500).json({ error: 'Error getting ticket' });
   }
 };
 
-// PATCH /api/chamados/:id - Update ticket status and register history
 export const updateTicketStatus = (req, res) => {
   try {
     const { id } = req.params;
-    const { status_novo, observacao } = req.body;
+    const { new_status, note } = req.body;
 
-    if (!status_novo) {
-      return res.status(400).json({ erro: 'Status novo é obrigatório' });
+    if (!new_status) {
+      return res.status(400).json({ error: 'New status is required' });
     }
 
-    const ticket = db.prepare('SELECT * FROM chamados WHERE id = ?').get(id);
+    const ticket = db.prepare('SELECT * FROM tickets WHERE id = ?').get(id);
 
     if (!ticket) {
-      return res.status(404).json({ erro: 'Chamado não encontrado' });
+      return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    const agora = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const now = getCurrentTimestamp();
 
-    const updateTicket = db.prepare(`
-      UPDATE chamados
+    db.prepare(`
+      UPDATE tickets
       SET status = ?, updated_at = ?
       WHERE id = ?
-    `);
-
-    updateTicket.run(status_novo, agora, id);
+    `).run(new_status, now, id);
 
     const historyId = randomUUID();
-    const insertHistory = db.prepare(`
-      INSERT INTO historico_chamados (id, chamado_id, status_anterior, status_novo, observacao, created_at)
+    db.prepare(`
+      INSERT INTO ticket_history (
+        id,
+        ticket_id,
+        previous_status,
+        new_status,
+        note,
+        created_at
+      )
       VALUES (?, ?, ?, ?, ?, ?)
-    `);
-
-    insertHistory.run(
+    `).run(
       historyId,
       id,
       ticket.status,
-      status_novo,
-      observacao || null,
-      agora
+      new_status,
+      note || null,
+      now
     );
 
     res.json({
       id,
-      status: status_novo,
-      updated_at: agora,
-      historico_registrado: {
+      status: new_status,
+      updated_at: now,
+      history_entry: {
         id: historyId,
-        status_anterior: ticket.status,
-        status_novo,
-        observacao,
-        created_at: agora
+        previous_status: ticket.status,
+        new_status,
+        note: note || null,
+        created_at: now
       }
     });
   } catch (error) {
-    console.error('Erro ao atualizar chamado:', error);
-    res.status(500).json({ erro: 'Erro ao atualizar chamado' });
+    console.error('Error updating ticket:', error);
+    res.status(500).json({ error: 'Error updating ticket' });
   }
 };
 
-// GET /api/usuarios - List available users
 export const listUsers = (req, res) => {
   try {
-    const users = db.prepare('SELECT * FROM usuarios ORDER BY nome ASC').all();
+    const users = db.prepare('SELECT * FROM users ORDER BY name ASC').all();
     res.json(users);
   } catch (error) {
-    console.error('Erro ao listar usuários:', error);
-    res.status(500).json({ erro: 'Erro ao listar usuários' });
+    console.error('Error listing users:', error);
+    res.status(500).json({ error: 'Error listing users' });
   }
 };

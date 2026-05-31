@@ -1,45 +1,42 @@
-// frontend/src/lib/api.ts
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export interface User {
   id: string;
-  nome: string;
+  name: string;
   email: string;
-  setor: string;
+  team: string;
   created_at: string;
 }
 
 export interface TicketHistory {
   id: string;
-  chamado_id: string;
-  status_anterior: string | null;
-  status_novo: string;
-  observacao: string | null;
+  ticket_id: string;
+  previous_status: string | null;
+  new_status: string;
+  note: string | null;
   created_at: string;
 }
 
 export interface Ticket {
   id: string;
-  titulo: string;
-  tipo: string;
-  descricao: string;
-  urgencia: string;
+  title: string;
+  type: string;
+  description: string;
+  priority: string;
   status: string;
-  responsavel_id: string | null;
-  responsavel_nome?: string;
-  responsavel_email?: string;
-  responsavel_setor?: string;
-  prazo_esperado: string | null;
+  responsible_id: string | null;
+  responsible_name?: string;
+  responsible_email?: string;
+  responsible_team?: string;
+  expected_due_date: string | null;
   created_at: string;
   updated_at: string;
-  historico?: TicketHistory[];
+  history?: TicketHistory[];
 }
 
-// GET /api/usuarios
 export const fetchUsers = async (): Promise<User[]> => {
   try {
-    const response = await fetch(`${API_URL}/api/usuarios`);
+    const response = await fetch(`${API_URL}/api/users`);
     if (!response.ok) throw new Error('Erro ao buscar usuários');
     return response.json();
   } catch (error) {
@@ -48,20 +45,19 @@ export const fetchUsers = async (): Promise<User[]> => {
   }
 };
 
-// GET /api/chamados
-export const fetchTickets = async (filtros?: {
+export const fetchTickets = async (filters?: {
   status?: string;
-  tipo?: string;
-  urgencia?: string;
+  type?: string;
+  priority?: string;
 }): Promise<Ticket[]> => {
   try {
-    let url = `${API_URL}/api/chamados`;
+    let url = `${API_URL}/api/tickets`;
 
-    if (filtros) {
+    if (filters) {
       const params = new URLSearchParams();
-      if (filtros.status) params.append('status', filtros.status);
-      if (filtros.tipo) params.append('tipo', filtros.tipo);
-      if (filtros.urgencia) params.append('urgencia', filtros.urgencia);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.type) params.append('type', filters.type);
+      if (filters.priority) params.append('priority', filters.priority);
 
       if (params.toString()) {
         url += `?${params.toString()}`;
@@ -77,10 +73,9 @@ export const fetchTickets = async (filtros?: {
   }
 };
 
-// GET /api/chamados/:id
 export const fetchTicketById = async (id: string): Promise<Ticket> => {
   try {
-    const response = await fetch(`${API_URL}/api/chamados/${id}`);
+    const response = await fetch(`${API_URL}/api/tickets/${id}`);
     if (!response.ok) throw new Error('Chamado não encontrado');
     return response.json();
   } catch (error) {
@@ -89,22 +84,21 @@ export const fetchTicketById = async (id: string): Promise<Ticket> => {
   }
 };
 
-// POST /api/chamados
-export const createTicket = async (dados: {
-  titulo: string;
-  tipo: string;
-  descricao: string;
-  urgencia: string;
-  responsavel_id?: string;
-  prazo_esperado?: string;
+export const createTicket = async (data: {
+  title: string;
+  type: string;
+  description: string;
+  priority: string;
+  responsible_id?: string;
+  expected_due_date?: string;
 }): Promise<Ticket> => {
   try {
-    const response = await fetch(`${API_URL}/api/chamados`, {
+    const response = await fetch(`${API_URL}/api/tickets`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(dados),
+      body: JSON.stringify(data),
     });
 
     if (!response.ok) throw new Error('Erro ao criar chamado');
@@ -115,21 +109,20 @@ export const createTicket = async (dados: {
   }
 };
 
-// PATCH /api/chamados/:id
 export const updateTicketStatus = async (
   id: string,
-  dados: {
-    status_novo: string;
-    observacao?: string;
+  data: {
+    new_status: string;
+    note?: string;
   }
 ): Promise<any> => {
   try {
-    const response = await fetch(`${API_URL}/api/chamados/${id}`, {
+    const response = await fetch(`${API_URL}/api/tickets/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(dados),
+      body: JSON.stringify(data),
     });
 
     if (!response.ok) throw new Error('Erro ao atualizar chamado');

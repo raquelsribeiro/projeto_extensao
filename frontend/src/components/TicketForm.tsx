@@ -16,12 +16,12 @@ const TicketForm = () => {
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
-    titulo: '',
-    tipo: 'Bug',
-    descricao: '',
-    urgencia: 'Média',
-    responsavel_id: '',
-    prazo_esperado: '',
+    title: '',
+    type: 'Bug',
+    description: '',
+    priority: 'Média',
+    responsible_id: '',
+    expected_due_date: '',
   });
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const TicketForm = () => {
     event.preventDefault();
     setError('');
 
-    if (!formData.titulo.trim() || !formData.descricao.trim()) {
+    if (!formData.title.trim() || !formData.description.trim()) {
       setError('Título e descrição são obrigatórios');
       return;
     }
@@ -58,12 +58,12 @@ const TicketForm = () => {
 
     try {
       const payload = {
-        titulo: formData.titulo,
-        tipo: formData.tipo,
-        descricao: formData.descricao,
-        urgencia: formData.urgencia,
-        ...(formData.responsavel_id && { responsavel_id: formData.responsavel_id }),
-        ...(formData.prazo_esperado && { prazo_esperado: formData.prazo_esperado }),
+        title: formData.title,
+        type: formData.type,
+        description: formData.description,
+        priority: formData.priority,
+        ...(formData.responsible_id && { responsible_id: formData.responsible_id }),
+        ...(formData.expected_due_date && { expected_due_date: formData.expected_due_date }),
       };
 
       await createTicket(payload);
@@ -89,8 +89,8 @@ const TicketForm = () => {
           label="Título"
           description="Resumo curto da demanda"
           placeholder="Ex.: Corrigir falha no acesso interno"
-          value={formData.titulo}
-          onChange={(event) => updateField('titulo', event.currentTarget.value)}
+          value={formData.title}
+          onChange={(event) => updateField('title', event.currentTarget.value)}
           required
         />
 
@@ -98,16 +98,16 @@ const TicketForm = () => {
           <Select
             label="Tipo"
             data={TICKET_TYPES}
-            value={formData.tipo}
-            onChange={(value) => updateField('tipo', value)}
+            value={formData.type}
+            onChange={(value) => updateField('type', value)}
             required
           />
 
           <Select
             label="Urgência"
             data={PRIORITIES}
-            value={formData.urgencia}
-            onChange={(value) => updateField('urgencia', value)}
+            value={formData.priority}
+            onChange={(value) => updateField('priority', value)}
             required
           />
         </SimpleGrid>
@@ -118,18 +118,18 @@ const TicketForm = () => {
             placeholder="Selecionar responsável"
             data={users.map((user) => ({
               value: user.id,
-              label: `${user.nome} (${user.setor})`,
+              label: `${user.name} (${user.team})`,
             }))}
-            value={formData.responsavel_id || null}
-            onChange={(value) => updateField('responsavel_id', value)}
+            value={formData.responsible_id || null}
+            onChange={(value) => updateField('responsible_id', value)}
             clearable
           />
 
           <TextInput
             label="Prazo esperado"
             type="date"
-            value={formData.prazo_esperado}
-            onChange={(event) => updateField('prazo_esperado', event.currentTarget.value)}
+            value={formData.expected_due_date}
+            onChange={(event) => updateField('expected_due_date', event.currentTarget.value)}
           />
         </SimpleGrid>
 
@@ -139,8 +139,8 @@ const TicketForm = () => {
           placeholder="Descreva o problema ou solicitação com detalhes"
           minRows={6}
           autosize
-          value={formData.descricao}
-          onChange={(event) => updateField('descricao', event.currentTarget.value)}
+          value={formData.description}
+          onChange={(event) => updateField('description', event.currentTarget.value)}
           required
         />
 

@@ -30,8 +30,8 @@ const Dashboard = () => {
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
     status: '',
-    tipo: '',
-    urgencia: '',
+    type: '',
+    priority: '',
   });
 
   const loadTickets = async () => {
@@ -40,8 +40,8 @@ const Dashboard = () => {
       setError('');
       const data = await fetchTickets({
         status: filters.status || undefined,
-        tipo: filters.tipo || undefined,
-        urgencia: filters.urgencia || undefined,
+        type: filters.type || undefined,
+        priority: filters.priority || undefined,
       });
       setTickets(data);
     } catch (err) {
@@ -132,16 +132,16 @@ const Dashboard = () => {
             label="Tipo"
             placeholder="Todos"
             data={TICKET_TYPES}
-            value={filters.tipo || null}
-            onChange={(value) => updateFilter('tipo', value)}
+            value={filters.type || null}
+            onChange={(value) => updateFilter('type', value)}
             clearable
           />
           <Select
             label="Urgência"
             placeholder="Todas"
             data={PRIORITIES}
-            value={filters.urgencia || null}
-            onChange={(value) => updateFilter('urgencia', value)}
+            value={filters.priority || null}
+            onChange={(value) => updateFilter('priority', value)}
             clearable
           />
         </SimpleGrid>

@@ -2,17 +2,17 @@
 
 import axios from 'axios';
 
-const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) => {
+const notifySlackTicketCreated = async (ticket, frontendUrl, responsibleName) => {
   const slackEnabled = process.env.SLACK_ENABLED === 'true';
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
   if (!slackEnabled) {
-    console.info('Integração Slack aguardando autorização da empresa.');
+    console.info('Slack integration is waiting for company authorization.');
     return;
   }
 
   if (!webhookUrl) {
-    console.warn('SLACK_WEBHOOK_URL não configurada, notificação não enviada.');
+    console.warn('SLACK_WEBHOOK_URL is not configured. Notification was not sent.');
     return;
   }
 
@@ -30,19 +30,19 @@ const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) =
         fields: [
           {
             type: 'mrkdwn',
-            text: `*Título:*\n${chamado.titulo}`
+            text: `*Título:*\n${ticket.title}`
           },
           {
             type: 'mrkdwn',
-            text: `*Tipo:*\n${chamado.tipo}`
+            text: `*Tipo:*\n${ticket.type}`
           },
           {
             type: 'mrkdwn',
-            text: `*Urgência:*\n${chamado.urgencia}`
+            text: `*Urgência:*\n${ticket.priority}`
           },
           {
             type: 'mrkdwn',
-            text: `*Responsável:*\n${responsavelNome || 'Não atribuído'}`
+            text: `*Responsável:*\n${responsibleName || 'Não atribuído'}`
           }
         ]
       },
@@ -50,23 +50,21 @@ const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) =
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*Descrição:*\n${chamado.descricao}`
+          text: `*Descrição:*\n${ticket.description}`
         }
       }
     ];
 
-    // Adiciona prazo esperado se informado
-    if (chamado.prazo_esperado) {
+    if (ticket.expected_due_date) {
       blocks.push({
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*Prazo Esperado:*\n${chamado.prazo_esperado}`
+          text: `*Prazo Esperado:*\n${ticket.expected_due_date}`
         }
       });
     }
 
-    // Adiciona botão para visualizar no frontend
     blocks.push({
       type: 'actions',
       elements: [
@@ -76,21 +74,18 @@ const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) =
             type: 'plain_text',
             text: 'Ver Chamado'
           },
-          value: chamado.id,
-          url: `${frontendUrl}/chamados/${chamado.id}`,
-          action_id: 'button-view-chamado'
+          value: ticket.id,
+          url: `${frontendUrl}/chamados/${ticket.id}`,
+          action_id: 'button-view-ticket'
         }
       ]
     });
 
-    // Envia para o Slack
-    await axios.post(webhookUrl, {
-      blocks: blocks
-    });
+    await axios.post(webhookUrl, { blocks });
 
-    console.log(`Notificação Slack enviada para chamado ${chamado.id}`);
+    console.log(`Slack notification sent for ticket ${ticket.id}`);
   } catch (error) {
-    console.error('Erro ao enviar notificação Slack:', error.message);
+    console.error('Error sending Slack notification:', error.message);
   }
 };
 
