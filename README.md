@@ -1,4 +1,4 @@
-# Sistema Interno de Chamados - VT Innovation
+# Sistema Interno de Chamados
 
 MVP acadêmico desenvolvido para centralizar demandas técnicas internas da VT Innovation. O sistema permite abrir chamados, acompanhar status, filtrar demandas, consultar detalhes e registrar histórico de atualização.
 
@@ -98,13 +98,13 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ## Endpoints
 
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| `GET` | `/` | Verificação do backend |
-| `GET` | `/api/users` | Lista usuários responsáveis |
-| `POST` | `/api/tickets` | Cria chamado |
-| `GET` | `/api/tickets` | Lista chamados com filtros opcionais |
-| `GET` | `/api/tickets/:id` | Retorna detalhe e histórico |
+| Método  | Rota               | Descrição                            |
+| ------- | ------------------ | ------------------------------------ |
+| `GET`   | `/`                | Verificação do backend               |
+| `GET`   | `/api/users`       | Lista usuários responsáveis          |
+| `POST`  | `/api/tickets`     | Cria chamado                         |
+| `GET`   | `/api/tickets`     | Lista chamados com filtros opcionais |
+| `GET`   | `/api/tickets/:id` | Retorna detalhe e histórico          |
 | `PATCH` | `/api/tickets/:id` | Atualiza status e registra histórico |
 
 ### Exemplo de criação
@@ -210,7 +210,6 @@ As evidências do projeto são apenas os prints das telas já adicionados na pas
 <img width="1918" height="875" alt="dashboard_home" src="https://github.com/user-attachments/assets/8e0c56f3-dfae-4184-a6cc-d1c09661dc88" />
 <img width="1918" height="875" alt="edit" src="https://github.com/user-attachments/assets/4310a891-ac1f-4df6-9ce9-75c2fa762375" />
 <img width="1918" height="875" alt="modal_edit" src="https://github.com/user-attachments/assets/d29c8640-5b25-4729-a6df-b8e565f69596" />
-
 
 Legendas:
 
