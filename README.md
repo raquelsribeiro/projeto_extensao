@@ -205,7 +205,12 @@ As evidências do projeto são apenas os prints das telas já adicionados na pas
 - `docs/edit.png` - Tela de detalhe do chamado com histórico de atualizações.
 - `docs/modal_edit.png` - Modal de atualização de status do chamado.
 
-Legendas sugeridas para o documento acadêmico:
+<img width="1918" height="875" alt="dashboard_home" src="https://github.com/user-attachments/assets/8e0c56f3-dfae-4184-a6cc-d1c09661dc88" />
+<img width="1918" height="875" alt="edit" src="https://github.com/user-attachments/assets/4310a891-ac1f-4df6-9ce9-75c2fa762375" />
+<img width="1918" height="875" alt="modal_edit" src="https://github.com/user-attachments/assets/d29c8640-5b25-4729-a6df-b8e565f69596" />
+
+
+Legendas:
 
 - Figura 1 - Dashboard de acompanhamento dos chamados.
 - Figura 2 - Tela de detalhe do chamado e histórico de atualizações.
