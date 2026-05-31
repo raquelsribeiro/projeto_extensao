@@ -1,16 +1,16 @@
 // backend/src/database/db.js
 
-import Database from 'better-sqlite3';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import Database from "better-sqlite3";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.join(__dirname, '../../database.sqlite');
+const dbPath = path.join(__dirname, "../../database.sqlite");
 const db = new Database(dbPath);
 
-db.pragma('foreign_keys = ON');
+db.pragma("foreign_keys = ON");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -44,12 +44,6 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (ticket_id) REFERENCES tickets(id)
   );
-`);
-
-db.exec(`
-  DROP TABLE IF EXISTS historico_chamados;
-  DROP TABLE IF EXISTS chamados;
-  DROP TABLE IF EXISTS usuarios;
 `);
 
 export default db;
