@@ -4,6 +4,8 @@ MVP acadêmico desenvolvido para centralizar demandas técnicas internas da VT I
 
 Este repositório acompanha o Projeto de Extensão V do curso de Análise e Desenvolvimento de Sistemas da Descomplica. O código é a fonte de verdade da documentação.
 
+Repositório GitHub: [raquelsribeiro/projeto_extensao](https://github.com/raquelsribeiro/projeto_extensao)
+
 ## Status
 
 - Frontend Next.js implementado
@@ -190,20 +192,24 @@ frontend/
       TicketForm.tsx
     lib/api.ts
 docs/
-  pex-v-vt-innovation-revisado.md
+  dashboard_home.png
+  edit.png
+  modal_edit.png
 ```
 
-## Evidências Recomendadas
+## Evidências
 
-Adicionar ao repositório, em `docs/evidencias/`:
+As evidências do projeto são apenas os prints das telas já adicionados na pasta `docs/`:
 
-- Print do formulário de abertura
-- Print do dashboard
-- Print da tela de detalhe com histórico
-- Print da execução local do backend
-- Print do build do frontend
-- Print do schema ou trecho do banco SQLite
-- Print da notificação Slack apenas após autorização da empresa
+- `docs/dashboard_home.png` - Dashboard de acompanhamento dos chamados.
+- `docs/edit.png` - Tela de detalhe do chamado com histórico de atualizações.
+- `docs/modal_edit.png` - Modal de atualização de status do chamado.
+
+Legendas sugeridas para o documento acadêmico:
+
+- Figura 1 - Dashboard de acompanhamento dos chamados.
+- Figura 2 - Tela de detalhe do chamado e histórico de atualizações.
+- Figura 3 - Modal de atualização de status do chamado.
 
 ## Limitações Conhecidas
 
