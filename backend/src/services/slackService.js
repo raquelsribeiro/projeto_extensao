@@ -2,34 +2,27 @@
 
 import axios from 'axios';
 
-const getPriorityEmoji = (urgencia) => {
-  const emojiMap = {
-    'Crítica': '🔴',
-    'Alta': '🟠',
-    'Média': '🟡',
-    'Baixa': '🟢'
-  };
-  return emojiMap[urgencia] || '⚪';
-};
-
 const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) => {
+  const slackEnabled = process.env.SLACK_ENABLED === 'true';
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
+  if (!slackEnabled) {
+    console.info('Integração Slack aguardando autorização da empresa.');
+    return;
+  }
+
   if (!webhookUrl) {
-    console.warn('⚠️ SLACK_WEBHOOK_URL não configurada, notificação não enviada.');
+    console.warn('SLACK_WEBHOOK_URL não configurada, notificação não enviada.');
     return;
   }
 
   try {
-    const urgenciaEmoji = getPriorityEmoji(chamado.urgencia);
-
     const blocks = [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: '🎫 Novo Chamado Criado',
-          emoji: true
+          text: 'Novo Chamado Criado'
         }
       },
       {
@@ -45,7 +38,7 @@ const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) =
           },
           {
             type: 'mrkdwn',
-            text: `*Urgência:*\n${urgenciaEmoji} ${chamado.urgencia}`
+            text: `*Urgência:*\n${chamado.urgencia}`
           },
           {
             type: 'mrkdwn',
@@ -81,8 +74,7 @@ const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) =
           type: 'button',
           text: {
             type: 'plain_text',
-            text: 'Ver Chamado',
-            emoji: true
+            text: 'Ver Chamado'
           },
           value: chamado.id,
           url: `${frontendUrl}/chamados/${chamado.id}`,
@@ -96,9 +88,9 @@ const notifySlackTicketCreated = async (chamado, frontendUrl, responsavelNome) =
       blocks: blocks
     });
 
-    console.log(`✅ Notificação Slack enviada para chamado ${chamado.id}`);
+    console.log(`Notificação Slack enviada para chamado ${chamado.id}`);
   } catch (error) {
-    console.error('❌ Erro ao enviar notificação Slack:', error.message);
+    console.error('Erro ao enviar notificação Slack:', error.message);
   }
 };
 

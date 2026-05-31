@@ -37,7 +37,7 @@ export interface Ticket {
 }
 
 // GET /api/usuarios
-export async function fetchUsers(): Promise<User[]> {
+export const fetchUsers = async (): Promise<User[]> => {
   try {
     const response = await fetch(`${API_URL}/api/usuarios`);
     if (!response.ok) throw new Error('Erro ao buscar usuários');
@@ -46,14 +46,14 @@ export async function fetchUsers(): Promise<User[]> {
     console.error('Erro na requisição de usuários:', error);
     throw error;
   }
-}
+};
 
 // GET /api/chamados
-export async function fetchTickets(filtros?: {
+export const fetchTickets = async (filtros?: {
   status?: string;
   tipo?: string;
   urgencia?: string;
-}): Promise<Ticket[]> {
+}): Promise<Ticket[]> => {
   try {
     let url = `${API_URL}/api/chamados`;
 
@@ -75,10 +75,10 @@ export async function fetchTickets(filtros?: {
     console.error('Erro na requisição de chamados:', error);
     throw error;
   }
-}
+};
 
 // GET /api/chamados/:id
-export async function fetchTicketById(id: string): Promise<Ticket> {
+export const fetchTicketById = async (id: string): Promise<Ticket> => {
   try {
     const response = await fetch(`${API_URL}/api/chamados/${id}`);
     if (!response.ok) throw new Error('Chamado não encontrado');
@@ -87,17 +87,17 @@ export async function fetchTicketById(id: string): Promise<Ticket> {
     console.error('Erro na requisição de chamado:', error);
     throw error;
   }
-}
+};
 
 // POST /api/chamados
-export async function createTicket(dados: {
+export const createTicket = async (dados: {
   titulo: string;
   tipo: string;
   descricao: string;
   urgencia: string;
   responsavel_id?: string;
   prazo_esperado?: string;
-}): Promise<Ticket> {
+}): Promise<Ticket> => {
   try {
     const response = await fetch(`${API_URL}/api/chamados`, {
       method: 'POST',
@@ -113,16 +113,16 @@ export async function createTicket(dados: {
     console.error('Erro ao criar chamado:', error);
     throw error;
   }
-}
+};
 
 // PATCH /api/chamados/:id
-export async function updateTicketStatus(
+export const updateTicketStatus = async (
   id: string,
   dados: {
     status_novo: string;
     observacao?: string;
   }
-): Promise<any> {
+): Promise<any> => {
   try {
     const response = await fetch(`${API_URL}/api/chamados/${id}`, {
       method: 'PATCH',
@@ -138,4 +138,4 @@ export async function updateTicketStatus(
     console.error('Erro ao atualizar chamado:', error);
     throw error;
   }
-}
+};

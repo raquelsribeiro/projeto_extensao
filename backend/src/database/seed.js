@@ -38,4 +38,4 @@ for (const user of usuarios) {
   insertUser.run(user.nome, user.email, user.setor);
 }
 
-console.log('✅ Banco de dados seed completo! 4 usuários inseridos.');
+console.log('Banco de dados seed completo. 4 usuários inseridos.');

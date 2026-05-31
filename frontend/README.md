@@ -1,6 +1,6 @@
 # Frontend - Sistema de Chamados VT Innovation
 
-Interface Next.js 14 com TypeScript e Tailwind CSS para gerenciar chamados.
+Interface Next.js 14 com TypeScript, Mantine UI e Tabler Icons para gerenciar chamados.
 
 ## 🚀 Início Rápido
 
@@ -64,16 +64,19 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ## 🎨 Design
 
-- **Framework CSS**: Tailwind CSS
+- **Biblioteca UI**: Mantine UI
+- **Ícones**: Tabler Icons
 - **Cores primárias**: Azul escuro (#1e3a5f)
 - **Responsivo**: Mobile-first design
-- **Sem bibliotecas externas**: Componentes puros com Tailwind
+- **Componentes**: Cards, formulários, modais, badges e timeline com Mantine
 
 ## 📦 Dependências Principais
 
 - `next` 14 - Framework React/SSR
 - `react` 18 - Biblioteca UI
-- `tailwindcss` - Utilitários CSS
+- `@mantine/core` - Componentes de interface
+- `@mantine/hooks` - Hooks utilitários
+- `@tabler/icons-react` - Ícones
 - `typescript` - Type safety
 
 ## ⚠️ Notas

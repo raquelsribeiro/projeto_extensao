@@ -51,6 +51,7 @@ Variáveis de ambiente (`.env`):
 
 ```
 SLACK_WEBHOOK_URL=
+SLACK_ENABLED=false
 PORT=3001
 FRONTEND_URL=http://localhost:3000
 ```

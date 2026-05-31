@@ -38,7 +38,7 @@ flowchart LR
 
 ## Tecnologias
 
-- Frontend: Next.js 14, React, TypeScript, Tailwind CSS
+- Frontend: Next.js 14, React, TypeScript, Mantine UI e Tabler Icons
 - Backend: Node.js, Express
 - Banco de dados: SQLite com better-sqlite3
 - Integrações preparadas: Slack Webhook e Jira API
@@ -79,6 +79,7 @@ Backend (`backend/.env`):
 
 ```env
 SLACK_WEBHOOK_URL=
+SLACK_ENABLED=false
 PORT=3001
 FRONTEND_URL=http://localhost:3000
 ```
@@ -89,7 +90,7 @@ Frontend (`frontend/.env.local`):
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-`SLACK_WEBHOOK_URL` deve permanecer vazio enquanto a empresa não autorizar o uso do webhook.
+`SLACK_ENABLED` deve permanecer `false` e `SLACK_WEBHOOK_URL` deve permanecer vazio enquanto a empresa não autorizar o uso do webhook.
 
 ## Endpoints
 

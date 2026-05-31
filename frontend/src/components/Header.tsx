@@ -1,14 +1,28 @@
-// frontend/src/components/Header.tsx
+import { Container, Group, Text, ThemeIcon, Title } from '@mantine/core';
+import { IconTicket } from '@tabler/icons-react';
 
-export default function Header() {
+const Header = () => {
   return (
-    <header className="bg-dark-blue text-white shadow-lg">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">🎫 Sistema de Chamados</h1>
-          <p className="text-gray-300 text-sm">VT Innovation</p>
-        </div>
-      </div>
+    <header style={{ background: '#102a43', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <Container size="lg" py="md">
+        <Group justify="space-between">
+          <Group gap="sm">
+            <ThemeIcon color="cyan" variant="light" size={42} radius="md">
+              <IconTicket size={24} />
+            </ThemeIcon>
+            <div>
+              <Title order={1} size="h3" c="white">
+                Sistema de Chamados
+              </Title>
+              <Text size="sm" c="blue.1">
+                VT Innovation
+              </Text>
+            </div>
+          </Group>
+        </Group>
+      </Container>
     </header>
   );
-}
+};
+
+export default Header;

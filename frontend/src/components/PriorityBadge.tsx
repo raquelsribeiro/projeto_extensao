@@ -1,43 +1,30 @@
-// frontend/src/components/PriorityBadge.tsx
+import { Badge } from '@mantine/core';
 
 interface PriorityBadgeProps {
   urgency: string;
 }
 
-export default function PriorityBadge({ urgency }: PriorityBadgeProps) {
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'Crítica':
-        return 'bg-red-100 text-red-800';
-      case 'Alta':
-        return 'bg-orange-100 text-orange-800';
-      case 'Média':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Baixa':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'Crítica':
+      return 'red';
+    case 'Alta':
+      return 'orange';
+    case 'Média':
+      return 'yellow';
+    case 'Baixa':
+      return 'green';
+    default:
+      return 'gray';
+  }
+};
 
-  const getPriorityEmoji = (priority: string) => {
-    switch (priority) {
-      case 'Crítica':
-        return '🔴';
-      case 'Alta':
-        return '🟠';
-      case 'Média':
-        return '🟡';
-      case 'Baixa':
-        return '🟢';
-      default:
-        return '⚪';
-    }
-  };
-
+const PriorityBadge = ({ urgency }: PriorityBadgeProps) => {
   return (
-    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getPriorityColor(urgency)}`}>
-      {getPriorityEmoji(urgency)} {urgency}
-    </span>
+    <Badge color={getPriorityColor(urgency)} variant="light" radius="sm" leftSection="●">
+      {urgency}
+    </Badge>
   );
-}
+};
+
+export default PriorityBadge;
